@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loop, Looped In — A hands-on Microsoft Loop course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b1430;
+    --ink-soft:#251c3d;
+    --violet:#6e56f8;
+    --violet-bright:#8a72ff;
+    --magenta:#ec4899;
+    --canvas:#f6f4fc;
+    --paper:#ffffff;
+    --mint:#13b083;
+    --mint-soft:#e3f7ef;
+    --text:#241b3a;
+    --muted:#6c648a;
+    --muted-2:#928bab;
+    --hairline:#e9e4f5;
+    --hairline-2:#f0ecfa;
+    --shadow:0 1px 2px rgba(27,20,48,.04),0 12px 32px -16px rgba(27,20,48,.22);
+    --shadow-lg:0 24px 60px -24px rgba(27,20,48,.4);
+    --grad:linear-gradient(125deg,#6e56f8 0%,#a855f7 45%,#ec4899 100%);
+    --grad-soft:linear-gradient(125deg,rgba(110,86,248,.12),rgba(236,72,153,.12));
+    --r-lg:22px; --r-md:15px; --r-sm:10px;
+    --fd:'Bricolage Grotesque',system-ui,sans-serif;
+    --fb:'Hanken Grotesk',system-ui,sans-serif;
+    --fm:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--fb);
+    color:var(--text);
+    background:var(--canvas);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:var(--violet);text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:rgba(138,114,255,.28)}
+  :focus-visible{outline:2.5px solid var(--violet);outline-offset:2px;border-radius:4px}
+
+  /* ---------- Shell ---------- */
+  .shell{display:grid;grid-template-columns:312px 1fr;min-height:100vh}
+
+  /* ---------- Sidebar ---------- */
+  .rail{
+    background:var(--ink);
+    color:#efeaff;
+    position:sticky;top:0;height:100vh;
+    display:flex;flex-direction:column;
+    border-right:1px solid rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .rail-head{padding:22px 22px 16px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mark{width:34px;height:34px;flex:0 0 auto}
+  .brand .name{font-family:var(--fd);font-weight:800;font-size:18px;letter-spacing:-.02em;line-height:1.05}
+  .brand .name b{display:block;font-weight:500;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#a99ee0;margin-top:2px;font-family:var(--fm)}
+
+  .progress-card{
+    margin:4px 18px 8px;padding:15px;border-radius:var(--r-md);
+    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:center;gap:14px;
+  }
+  .ring{width:54px;height:54px;flex:0 0 auto;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fm);font-weight:700;font-size:13px;color:#fff}
+  .progress-card .meta{font-size:12.5px;color:#c7bef0;line-height:1.35}
+  .progress-card .meta b{display:block;color:#fff;font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:-.01em}
+
+  .nav{flex:1;overflow-y:auto;padding:8px 12px 12px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+  .nav::-webkit-scrollbar{width:8px}
+  .nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:8px}
+  .nav-label{font-family:var(--fm);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#7d72ad;padding:12px 12px 6px}
+  .nav-item{
+    width:100%;text-align:left;border:0;background:transparent;color:#d9d2f4;
+    display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:11px;
+    cursor:pointer;font-family:var(--fb);font-size:14px;font-weight:500;
+    transition:background .16s ease,color .16s ease;position:relative;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(138,114,255,.20);color:#fff}
+  .nav-item.active::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--grad)}
+  .nav-num{
+    width:24px;height:24px;flex:0 0 auto;border-radius:7px;display:grid;place-items:center;
+    font-family:var(--fm);font-size:11px;font-weight:700;
+    background:rgba(255,255,255,.08);color:#b3a8e0;transition:.16s;
+  }
+  .nav-item.active .nav-num{background:var(--grad);color:#fff}
+  .nav-item.done .nav-num{background:var(--mint);color:#06281d}
+  .nav-txt{flex:1;line-height:1.25}
+  .nav-check{width:15px;height:15px;flex:0 0 auto;opacity:0;transition:.2s}
+  .nav-item.done .nav-check{opacity:1}
+
+  .rail-foot{padding:12px 18px 18px;border-top:1px solid rgba(255,255,255,.07)}
+  .openloop{
+    display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    padding:11px;border-radius:12px;border:0;cursor:pointer;
+    background:var(--grad);color:#fff;font-family:var(--fb);font-weight:700;font-size:13.5px;
+    box-shadow:0 8px 22px -10px rgba(236,72,153,.7);transition:transform .14s ease,filter .14s;
+    text-decoration:none;
+  }
+  .openloop:hover{transform:translateY(-1px);filter:brightness(1.06);text-decoration:none}
+  .rail-foot .hint{font-size:11px;color:#8c81b8;text-align:center;margin:9px 0 0;line-height:1.4}
+
+  /* ---------- Main ---------- */
+  .main{min-width:0;display:flex;flex-direction:column}
+  .topbar{display:none}
+  .canvas{max-width:824px;width:100%;margin:0 auto;padding:46px 40px 110px}
+
+  .eyebrow{font-family:var(--fm);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--violet);font-weight:700;display:flex;align-items:center;gap:10px}
+  .eyebrow .dash{height:1.5px;width:26px;background:var(--grad);border-radius:2px}
+  h1.module-title{font-family:var(--fd);font-weight:800;letter-spacing:-.03em;line-height:1.02;font-size:clamp(30px,4.4vw,46px);margin:16px 0 8px}
+  .lede{font-size:18.5px;color:var(--muted);max-width:62ch;margin:0 0 6px;line-height:1.5}
+
+  .module-body{margin-top:30px}
+  .module-body h2{font-family:var(--fd);font-weight:700;letter-spacing:-.02em;font-size:23px;margin:38px 0 10px;line-height:1.15}
+  .module-body h3{font-family:var(--fd);font-weight:700;font-size:17px;margin:26px 0 6px;letter-spacing:-.01em}
+  .module-body p{margin:0 0 14px;font-size:16.5px}
+  .module-body strong{color:var(--ink-soft);font-weight:700}
+  .module-body ul{margin:4px 0 16px;padding:0;list-style:none}
+  .module-body ul li{position:relative;padding:3px 0 3px 26px;font-size:16px}
+  .module-body ul li::before{content:"";position:absolute;left:4px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+  .module-body .lo{color:var(--violet);font-weight:700}
+  code.k{font-family:var(--fm);font-size:.86em;background:var(--grad-soft);color:#5b3fb8;padding:2px 7px;border-radius:6px;font-weight:700;border:1px solid var(--hairline)}
+
+  /* concept cards / callouts */
+  .card{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);box-shadow:var(--shadow);padding:20px 22px;margin:18px 0}
+  .note{background:var(--grad-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:15px 18px;margin:18px 0;font-size:15px;display:flex;gap:12px;align-items:flex-start}
+  .note .ic{flex:0 0 auto;width:22px;height:22px;margin-top:1px;color:var(--violet)}
+  .note b{color:var(--ink-soft)}
+
+  /* try-it box */
+  .tryit{border:1.5px solid transparent;background:
+      linear-gradient(var(--paper),var(--paper)) padding-box,
+      var(--grad) border-box;
+    border-radius:var(--r-lg);padding:22px 24px;margin:26px 0;box-shadow:var(--shadow)}
+  .tryit-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .tryit-head .tag{font-family:var(--fm);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--grad);padding:5px 10px;border-radius:999px}
+  .tryit-head h3{font-family:var(--fd);font-weight:800;font-size:19px;margin:0;letter-spacing:-.02em}
+  .tryit p.sub{margin:2px 0 14px;color:var(--muted);font-size:14.5px}
+  .checklist{list-style:none;margin:0;padding:0}
+  .checklist li{margin:0}
+  .checklist label{display:flex;gap:13px;align-items:flex-start;padding:10px 12px;border-radius:11px;cursor:pointer;transition:background .14s;font-size:15.5px}
+  .checklist label:hover{background:var(--hairline-2)}
+  .checklist input{position:absolute;opacity:0;width:0;height:0}
+  .box{flex:0 0 auto;width:22px;height:22px;border-radius:7px;border:2px solid var(--hairline);background:#fff;margin-top:1px;display:grid;place-items:center;transition:.16s}
+  .box svg{width:13px;height:13px;color:#fff;opacity:0;transform:scale(.5);transition:.16s}
+  .checklist input:checked + .box{background:var(--mint);border-color:var(--mint)}
+  .checklist input:checked + .box svg{opacity:1;transform:scale(1)}
+  .checklist input:checked ~ .ctxt{color:var(--muted-2);text-decoration:line-through;text-decoration-color:var(--hairline)}
+  .ctxt{line-height:1.4}
+  .ctxt b{color:var(--ink-soft)}
+  .tryit-foot{margin-top:12px;font-size:13px;color:var(--muted-2);display:flex;align-items:center;gap:8px}
+  .openloop-sm{display:inline-flex;align-items:center;gap:7px;font-family:var(--fb);font-weight:700;font-size:13px;color:var(--violet);background:var(--grad-soft);border:1px solid var(--hairline);padding:6px 12px;border-radius:999px;cursor:pointer;text-decoration:none}
+  .openloop-sm:hover{text-decoration:none;filter:brightness(.98)}
+
+  /* quiz */
+  .quiz{margin:30px 0 0;padding-top:26px;border-top:1px dashed var(--hairline)}
+  .quiz-h{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+  .quiz-h .qmark{width:30px;height:30px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--fd);font-weight:800;font-size:15px}
+  .quiz-h h2{margin:0;font-family:var(--fd);font-weight:800;font-size:21px;letter-spacing:-.02em}
+  .quiz-sub{color:var(--muted);font-size:14.5px;margin:0 0 18px}
+  .q{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+  .q .qtext{font-weight:700;font-size:16.5px;color:var(--ink-soft);margin:0 0 13px;font-family:var(--fd);letter-spacing:-.01em;line-height:1.3}
+  .opt{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border:1.5px solid var(--hairline);border-radius:11px;margin:8px 0;cursor:pointer;transition:.13s;font-size:15.5px;background:#fff}
+  .opt:hover{border-color:var(--violet-bright);background:var(--hairline-2)}
+  .opt .dot{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--muted-2);margin-top:1px;display:grid;place-items:center;transition:.13s}
+  .opt .dot i{width:8px;height:8px;border-radius:50%;background:var(--violet);opacity:0;transition:.13s}
+  .opt.sel{border-color:var(--violet);background:var(--grad-soft)}
+  .opt.sel .dot{border-color:var(--violet)}
+  .opt.sel .dot i{opacity:1}
+  .opt.correct{border-color:var(--mint);background:var(--mint-soft)}
+  .opt.correct .dot{border-color:var(--mint);background:var(--mint)}
+  .opt.correct .dot i{background:#fff;opacity:1}
+  .opt.wrong{border-color:#e5736f;background:#fdeeee}
+  .opt.wrong .dot{border-color:#e5736f;background:#e5736f}
+  .opt.locked{pointer-events:none}
+  .feedback{margin-top:12px;padding:13px 16px;border-radius:11px;font-size:14.5px;display:none;line-height:1.5}
+  .feedback.show{display:block}
+  .feedback.ok{background:var(--mint-soft);color:#0c5e45;border:1px solid #b7e8d6}
+  .feedback.no{background:#fdeeee;color:#9c302c;border:1px solid #f3c9c7}
+  .feedback b{font-weight:700}
+
+  .checkbtn{margin-top:6px;border:0;cursor:pointer;font-family:var(--fb);font-weight:700;font-size:14.5px;color:#fff;background:var(--ink);padding:11px 22px;border-radius:11px;transition:.14s}
+  .checkbtn:hover{background:var(--violet)}
+  .checkbtn:disabled{opacity:.45;cursor:not-allowed}
+  .checkbtn.again{background:var(--grad)}
+
+  .module-done-banner{display:none;align-items:center;gap:13px;margin:24px 0 0;padding:16px 20px;border-radius:var(--r-md);background:var(--mint-soft);border:1px solid #bfead9;color:#0c5e45;font-weight:600;font-size:15px}
+  .module-done-banner.show{display:flex;animation:pop .4s ease}
+  .module-done-banner .bdg{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--mint);color:#fff;display:grid;place-items:center}
+  @keyframes pop{0%{transform:scale(.96);opacity:0}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
+
+  /* footer nav */
+  .pager{display:flex;justify-content:space-between;gap:14px;margin-top:46px;padding-top:26px;border-top:1px solid var(--hairline)}
+  .pager button{border:1px solid var(--hairline);background:var(--paper);cursor:pointer;border-radius:13px;padding:14px 20px;text-align:left;font-family:var(--fb);transition:.14s;flex:1;max-width:340px;box-shadow:var(--shadow)}
+  .pager button:hover:not(:disabled){border-color:var(--violet-bright);transform:translateY(-1px)}
+  .pager button:disabled{opacity:.4;cursor:not-allowed}
+  .pager .pg-dir{font-family:var(--fm);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);display:block;margin-bottom:3px}
+  .pager .pg-name{font-family:var(--fd);font-weight:700;font-size:15.5px;color:var(--ink-soft);letter-spacing:-.01em}
+  .pager .next{text-align:right}
+
+  /* ---------- Hero (intro module) ---------- */
+  .hero{position:relative;overflow:hidden;border-radius:26px;background:var(--ink);color:#fff;padding:46px 44px 40px;margin-bottom:8px;box-shadow:var(--shadow-lg)}
+  .hero-grid{position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.07) 1px,transparent 0);background-size:26px 26px;opacity:.6}
+  .hero-loop{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:430px;height:430px;opacity:.95;pointer-events:none}
+  .hero-content{position:relative;max-width:560px}
+  .hero .eyebrow{color:#c9bdff}
+  .hero .eyebrow .dash{background:linear-gradient(90deg,#a78bfa,#f472b6)}
+  .hero h1{font-family:var(--fd);font-weight:800;letter-spacing:-.035em;line-height:.98;font-size:clamp(38px,6vw,62px);margin:16px 0 14px}
+  .hero h1 .flow{background:linear-gradient(115deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{font-size:18px;color:#cfc6ef;max-width:46ch;margin:0 0 26px}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn-primary{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--ink);font-family:var(--fb);font-weight:700;font-size:15px;padding:13px 22px;border-radius:13px;border:0;cursor:pointer;transition:.14s;text-decoration:none}
+  .btn-primary:hover{transform:translateY(-1px);text-decoration:none}
+  .btn-ghost{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.09);color:#fff;font-family:var(--fb);font-weight:700;font-size:15px;padding:13px 22px;border-radius:13px;border:1px solid rgba(255,255,255,.16);cursor:pointer;transition:.14s;text-decoration:none}
+  .btn-ghost:hover{background:rgba(255,255,255,.16);text-decoration:none}
+
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 6px}
+  .fact{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:18px;box-shadow:var(--shadow)}
+  .fact .n{font-family:var(--fd);font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .fact .l{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+  .intro-h2{font-family:var(--fd);font-weight:800;font-size:25px;letter-spacing:-.02em;margin:40px 0 6px}
+  .intro-sub{color:var(--muted);font-size:16px;margin:0 0 20px;max-width:60ch}
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .pillar{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .pillar .pic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--grad-soft);color:var(--violet);margin-bottom:14px}
+  .pillar h4{font-family:var(--fd);font-weight:800;font-size:18px;margin:0 0 5px;letter-spacing:-.01em}
+  .pillar p{font-size:14px;color:var(--muted);margin:0;line-height:1.5}
+  .pillar .tier{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin-bottom:10px}
+
+  .how-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  .how{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:20px 22px;box-shadow:var(--shadow)}
+  .how h4{font-family:var(--fd);font-weight:700;font-size:16.5px;margin:0 0 4px;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+  .how h4 .ic{color:var(--violet)}
+  .how p{font-size:14.5px;color:var(--muted);margin:0}
+  .how .plat{font-family:var(--fm);font-size:12px;color:var(--ink-soft);margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+  .how .plat span{background:var(--hairline-2);padding:3px 9px;border-radius:7px;border:1px solid var(--hairline)}
+
+  /* three-layer diagram */
+  .layers{margin:8px 0 4px}
+  .layer{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:var(--r-md);margin:9px 0;position:relative}
+  .layer.l1{background:linear-gradient(90deg,rgba(110,86,248,.10),rgba(110,86,248,.03));border:1px solid rgba(110,86,248,.22)}
+  .layer.l2{background:linear-gradient(90deg,rgba(168,85,247,.10),rgba(168,85,247,.03));border:1px solid rgba(168,85,247,.22);margin-left:26px}
+  .layer.l3{background:linear-gradient(90deg,rgba(236,72,153,.10),rgba(236,72,153,.03));border:1px solid rgba(236,72,153,.22);margin-left:52px}
+  .layer .lic{width:40px;height:40px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;color:#fff}
+  .layer.l1 .lic{background:#6e56f8}.layer.l2 .lic{background:#a855f7}.layer.l3 .lic{background:#ec4899}
+  .layer .ltxt b{font-family:var(--fd);font-weight:800;font-size:16px;display:block;letter-spacing:-.01em}
+  .layer .ltxt span{font-size:13.5px;color:var(--muted)}
+
+  /* component gallery */
+  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+  .comp{display:flex;gap:13px;align-items:flex-start;background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:14px 15px;box-shadow:var(--shadow)}
+  .comp .cic{width:34px;height:34px;flex:0 0 auto;border-radius:9px;background:var(--grad-soft);color:var(--violet);display:grid;place-items:center}
+  .comp b{font-family:var(--fd);font-weight:700;font-size:14.5px;display:block;letter-spacing:-.01em}
+  .comp span{font-size:13px;color:var(--muted);line-height:1.4}
+
+  /* sync diagram */
+  .sync{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin:18px 0}
+  .sync-app{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .sync-app .ttl{font-family:var(--fm);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .sync-chip{background:var(--grad-soft);border:1px solid rgba(110,86,248,.25);border-radius:9px;padding:9px;font-size:12.5px;color:var(--ink-soft);font-weight:600}
+  .sync-mid{display:flex;flex-direction:column;align-items:center;color:var(--violet);font-family:var(--fm);font-size:10px;letter-spacing:.1em;gap:4px}
+
+  /* scope split */
+  .scopes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .scope{border-radius:var(--r-md);padding:18px 20px;border:1px solid var(--hairline);background:var(--paper);box-shadow:var(--shadow)}
+  .scope h4{font-family:var(--fd);font-weight:700;font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .scope.good h4{color:#0c5e45}.scope.warn h4{color:#9a5300}
+  .scope p{margin:0;font-size:14px;color:var(--muted)}
+  .scope .pip{width:9px;height:9px;border-radius:50%}
+  .scope.good .pip{background:var(--mint)}.scope.warn .pip{background:#e8a33d}
+
+  /* ---------- Certificate / final ---------- */
+  .cert-intro{text-align:center;max-width:560px;margin:0 auto}
+  .name-row{display:flex;gap:12px;max-width:480px;margin:22px auto 0;flex-wrap:wrap}
+  .name-row input{flex:1;min-width:220px;font-family:var(--fb);font-size:16px;padding:14px 16px;border-radius:13px;border:1.5px solid var(--hairline);background:#fff;color:var(--text)}
+  .name-row input:focus{outline:none;border-color:var(--violet)}
+  .name-row button{border:0;cursor:pointer;background:var(--grad);color:#fff;font-family:var(--fb);font-weight:700;font-size:15px;padding:14px 24px;border-radius:13px;transition:.14s}
+  .name-row button:hover{filter:brightness(1.05);transform:translateY(-1px)}
+
+  .certificate{position:relative;background:var(--paper);border-radius:24px;padding:46px 48px;margin:30px auto 0;max-width:680px;box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--hairline)}
+  .certificate::before{content:"";position:absolute;inset:0;border-radius:24px;padding:2px;background:var(--grad);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .cert-grid{position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(110,86,248,.10) 1px,transparent 0);background-size:22px 22px;opacity:.7}
+  .cert-in{position:relative;text-align:center}
+  .cert-seal{width:64px;height:64px;margin:0 auto 14px}
+  .cert-k{font-family:var(--fm);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--violet);font-weight:700}
+  .cert-sub{font-size:14px;color:var(--muted);margin:18px 0 6px}
+  .cert-name{font-family:var(--fd);font-weight:800;font-size:38px;letter-spacing:-.02em;line-height:1.05;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding:2px 0;word-break:break-word}
+  .cert-course{font-family:var(--fd);font-weight:700;font-size:20px;margin:14px 0 4px;color:var(--ink-soft)}
+  .cert-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:30px;gap:20px}
+  .cert-foot .blk{text-align:left}
+  .cert-foot .blk.r{text-align:right}
+  .cert-foot .lbl{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2)}
+  .cert-foot .val{font-family:var(--fd);font-weight:700;font-size:15px;color:var(--ink-soft);margin-top:2px}
+  .cert-actions{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+
+  .score-ring{width:120px;height:120px;margin:0 auto 6px;position:relative}
+  .score-ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fd);font-weight:800;font-size:30px;color:var(--ink-soft);flex-direction:column}
+  .score-ring .num small{font-family:var(--fm);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.05em;margin-top:-2px}
+
+  .reset-link{display:block;text-align:center;margin:60px auto 0;font-size:12.5px;color:var(--muted-2);background:none;border:0;cursor:pointer;font-family:var(--fb)}
+  .reset-link:hover{color:var(--magenta);text-decoration:underline}
+
+  .save-toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.3s;z-index:50;display:flex;align-items:center;gap:8px}
+  .save-toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr}
+    .rail{position:fixed;left:0;top:0;width:300px;z-index:60;transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}
+    .rail.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+    .scrim{position:fixed;inset:0;background:rgba(20,14,38,.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:.26s;z-index:55}
+    .scrim.show{opacity:1;pointer-events:auto}
+    .topbar{display:flex;align-items:center;gap:14px;padding:12px 16px;position:sticky;top:0;background:rgba(246,244,252,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--hairline);z-index:40}
+    .burger{width:42px;height:42px;border-radius:11px;border:1px solid var(--hairline);background:#fff;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+    .topbar .tb-title{font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:-.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .topbar .tb-pct{font-family:var(--fm);font-weight:700;font-size:13px;color:var(--violet);flex:0 0 auto}
+    .canvas{padding:26px 18px 90px}
+    .facts,.pillars,.how-row,.gallery,.sync,.scopes{grid-template-columns:1fr}
+    .sync-mid{flex-direction:row;padding:6px 0}
+    .hero{padding:34px 26px}
+    .hero-loop{opacity:.18;right:-90px}
+    .layer.l2{margin-left:14px}.layer.l3{margin-left:28px}
+    .certificate{padding:32px 24px}
+    .cert-name{font-size:28px}
+    .pager{flex-direction:column}
+    .pager button{max-width:none}
+  }
+  @media (min-width:901px){.topbar{display:none}.scrim{display:none}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+    .pulse-dash{animation:none !important}
+  }
+  @media print{
+    .rail,.topbar,.pager,.cert-actions,.reset-link,.save-toast,.name-row,.score-block{display:none !important}
+    .shell{display:block}.canvas{max-width:100%;padding:0}
+    .certificate{box-shadow:none;margin:0}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="rail" id="rail">
+    <div class="rail-head">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <defs><linearGradient id="bg" x1="0" y1="0" x2="40" y2="40">
+            <stop offset="0" stop-color="#8a72ff"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs>
+          <path d="M13 20c0-4 3-7 7-7s7 3 7 7-3 7-7 7c-2.6 0-4-1.4-5.4-3.4C13.2 21 12 20 10 20c-2.8 0-5 2.2-5 5s2.2 5 5 5c2 0 3.2-1 4.6-3"
+            stroke="url(#bg)" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+          <circle cx="30.5" cy="14" r="3.6" fill="url(#bg)"/>
+        </svg>
+        <div class="name">Looped In<b>Microsoft Loop course</b></div>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="ring" aria-hidden="true">
+        <svg width="54" height="54" viewBox="0 0 54 54">
+          <circle cx="27" cy="27" r="22" stroke="rgba(255,255,255,.12)" stroke-width="5" fill="none"/>
+          <circle id="ringFill" cx="27" cy="27" r="22" stroke="url(#bg)" stroke-width="5" fill="none"
+            stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)"/>
+        </svg>
+        <div class="pct" id="ringPct">0%</div>
+      </div>
+      <div class="meta"><b id="doneCount">0 of 7</b>modules complete</div>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Course modules"></nav>
+
+    <div class="rail-foot">
+      <a class="openloop" href="https://loop.cloud.microsoft" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7M21 3l-9 9M10 5H5a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Open Microsoft Loop
+      </a>
+      <p class="hint">Keep this open in one window and Loop in another so you can try each step as you go.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <button class="burger" id="burger" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#241b3a" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="tb-title" id="tbTitle">Welcome</div>
+      <div class="tb-pct" id="tbPct">0%</div>
+    </div>
+    <div class="canvas" id="canvas"></div>
+  </main>
+</div>
+
+<div class="save-toast" id="toast">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#13b083" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Progress saved
+</div>
+
+<script>
+/* ============================================================
+   STORAGE — works in the Claude artifact viewer (persistent
+   storage), as a hosted/intranet page (localStorage), and
+   falls back to in-memory if both are blocked. Never throws.
+   ============================================================ */
+const KEY = 'ms_loop_course_v1';
+let mem = null;
+async function loadState(){
+  try{ if(window.storage && window.storage.get){ const r = await window.storage.get(KEY); if(r && r.value) return JSON.parse(r.value); } }catch(e){}
+  try{ const v = window.localStorage.getItem(KEY); if(v) return JSON.parse(v); }catch(e){}
+  return mem;
+}
+async function saveState(s){
+  mem = s; const str = JSON.stringify(s);
+  try{ if(window.storage && window.storage.set){ await window.storage.set(KEY, str); flashSaved(); return; } }catch(e){}
+  try{ window.localStorage.setItem(KEY, str); }catch(e){}
+  flashSaved();
+}
+let toastT;
+function flashSaved(){ const t=document.getElementById('toast'); if(!t)return; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1400); }
+
+/* ============================================================
+   ICONS
+   ============================================================ */
+const I = {
+  comp:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="2" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="11" height="6" rx="2" stroke="currentColor" stroke-width="2"/></svg>',
+  page:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v4h4M8 12h8M8 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  ws:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M7 5V3M17 5V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  sync:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 01-9 9 9 9 0 01-7.5-4M3 12a9 9 0 019-9 9 9 0 017.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 3v5h-5M4 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  table:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M9 4v16" stroke="currentColor" stroke-width="2"/></svg>',
+  task:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6l2 2 3-3M4 13l2 2 3-3M4 20l2 2 3-3M13 6h7M13 13h7M13 20h7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  vote:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 11l3 3 7-7M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 3l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  kanban:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="5" height="14" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="10" y="4" width="5" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="17" y="4" width="4" height="11" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>',
+  progress:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="6" rx="3" stroke="currentColor" stroke-width="2"/><rect x="3" y="9" width="11" height="6" rx="3" fill="currentColor" opacity=".35"/></svg>',
+  check:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  qa:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 9a3 3 0 113.8 2.9c-.8.3-1.3 1-1.3 1.8M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>',
+  para:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  cal:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  at:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M16 8v5a3 3 0 006 0 9 9 0 10-3.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  teams:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 20a6 6 0 0112 0M17 6a3 3 0 010 6M16 20a6 6 0 014.5-5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  mail:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  shield:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  tag:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l8-8h8v8l-8 8-8-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="15" cy="9" r="1.4" fill="currentColor"/></svg>',
+  spark:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 4.8L19 9.6l-4.4 2.6L13 18l-3.2-4.2L4 13l4.4-3L9 5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  tmpl:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2"/></svg>',
+  arrow:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  tick:'<svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+/* ============================================================
+   COURSE CONTENT
+   ============================================================ */
+const COURSE = [
+  /* ---------- 0. INTRO ---------- */
+  {
+    id:'welcome', type:'intro', nav:'Welcome', eyebrow:'Start here',
+    render:()=>`
+      <div class="hero">
+        <div class="hero-grid"></div>
+        ${heroLoopSVG()}
+        <div class="hero-content">
+          <div class="eyebrow"><span class="dash"></span> A hands-on mini course</div>
+          <h1>Get <span class="flow">looped in</span> on Microsoft Loop.</h1>
+          <p>By the end you'll create workspaces and pages, build live components, and collaborate across Teams, Outlook and Word — with a few minutes on privacy so you stay on the safe side.</p>
+          <div class="hero-cta">
+            <button class="btn-primary" onclick="next()">Start module 1 ${I.arrow}</button>
+            <a class="btn-ghost" href="https://loop.cloud.microsoft" target="_blank" rel="noopener">Open Loop to follow along</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="facts">
+        <div class="fact"><div class="n">3</div><div class="l">building blocks to learn: components, pages &amp; workspaces</div></div>
+        <div class="fact"><div class="n">~35</div><div class="l">minutes, at your own pace — your progress saves automatically</div></div>
+        <div class="fact"><div class="n">7</div><div class="l">short modules, each with a try-it task in your real Loop app</div></div>
+      </div>
+
+      <h2 class="intro-h2">How this course works</h2>
+      <p class="intro-sub">This isn't a video to watch passively. The best way to learn Loop is to use it, so every module ends with a short checklist you do in your own Loop app — then a quick quiz to lock it in.</p>
+      <div class="how-row">
+        <div class="how">
+          <h4><span class="ic">${I.page}</span> Read a short lesson</h4>
+          <p>Plain-language explanations with diagrams — no jargon, no fluff. Each one takes a few minutes.</p>
+        </div>
+        <div class="how">
+          <h4><span class="ic">${I.sync}</span> Try it in real Loop</h4>
+          <p>Open your desktop or web Loop app and do the steps yourself. That's where it actually sticks.</p>
+          <div class="plat"><span>Windows app</span><span>loop.cloud.microsoft</span><span>iOS / Android</span></div>
+        </div>
+      </div>
+
+      <h2 class="intro-h2">First, open your Loop app</h2>
+      <p class="intro-sub">You'll want it side by side with this course. There are three ways in — use whichever you have:</p>
+      <div class="pillars">
+        <div class="pillar"><div class="tier">Recommended</div><div class="pic">${I.ws}</div><h4>Desktop app</h4><p>The Microsoft Loop app for Windows. Search "Loop" in your Start menu, or install it from the Microsoft Store.</p></div>
+        <div class="pillar"><div class="tier">Any browser</div><div class="pic">${I.page}</div><h4>On the web</h4><p>Go to <strong>loop.cloud.microsoft</strong> and sign in with your work or school account. Nothing to install.</p></div>
+        <div class="pillar"><div class="tier">On the go</div><div class="pic">${I.comp}</div><h4>Mobile</h4><p>The Loop app on iOS or Android, for viewing and quick edits away from your desk.</p></div>
+      </div>
+      <div class="note" style="margin-top:22px">
+        <span class="ic">${I.shield}</span>
+        <div><b>Don't see Loop, or a feature is missing?</b> That's usually your organisation's policy rather than a bug — your IT admin controls who can create Loop content. Ask them if Loop should be switched on for your team.</div>
+      </div>
+    `
+  },
+
+  /* ---------- 1. WHAT LOOP IS ---------- */
+  {
+    id:'what', type:'lesson', nav:'What Loop is', num:1, eyebrow:'Module 01 · The big picture',
+    title:'What Microsoft Loop actually is',
+    lede:'Before any buttons: the one idea that makes everything else click.',
+    body:()=>`
+      <p>Microsoft Loop is a collaborative app in Microsoft 365 for thinking, planning and creating together — in real time. The thing that makes it different from a normal document is in the name: content in Loop stays <strong>in a loop</strong>, synced across every place it appears.</p>
+      <p>Write a task list once, drop it into a Teams chat and an Outlook email, and it's the <em>same</em> living list in both. Tick something off in the email and it updates in the chat instantly. Nobody emails "v3_final_FINAL.docx" around.</p>
+
+      <h2>The three building blocks</h2>
+      <p>Almost everything in Loop is one of three things, nested like Russian dolls. Get this picture and the whole app makes sense:</p>
+      <div class="layers">
+        <div class="layer l1"><div class="lic">${I.comp}</div><div class="ltxt"><b>Component</b><span>A live block of content — a table, task list, note or vote. The piece that travels and stays in sync.</span></div></div>
+        <div class="layer l2"><div class="lic">${I.page}</div><div class="ltxt"><b>Page</b><span>A flexible canvas that holds many components, text and links. Starts small, grows with your idea.</span></div></div>
+        <div class="layer l3"><div class="lic">${I.ws}</div><div class="ltxt"><b>Workspace</b><span>A shared home for a project — holds related pages so your team sees everything in one place.</span></div></div>
+      </div>
+      <div class="note"><span class="ic">${I.sync}</span><div>Read it bottom-up: a <b>workspace</b> holds <b>pages</b>, a page holds <b>components</b>, and a component is the bit that can pop out and live inside Teams, Outlook, Word and more — always showing the latest version.</div></div>
+
+      <h2>Why people bother</h2>
+      <ul>
+        <li><strong>One source of truth.</strong> Everyone edits the same live content, so there's no "which version is right?"</li>
+        <li><strong>Work where you already are.</strong> Components show up inside the apps you use all day, not a separate silo.</li>
+        <li><strong>Catch up fast.</strong> A workspace is a project hub — see what changed and what's outstanding at a glance.</li>
+      </ul>
+    `,
+    tryit:{
+      title:'Look around your Loop app',
+      sub:'No creating yet — just get oriented so the layout feels familiar.',
+      items:[
+        ['Open Loop','Launch the desktop app or go to <b>loop.cloud.microsoft</b> and sign in.'],
+        ['Find the left rail','Notice the list of workspaces down the left side — that\'s your project list.'],
+        ['Open <b>My workspace</b>','It\'s your private space. Click in and see any starter pages inside it.'],
+        ['Spot the three layers','See if you can point to a workspace, a page inside it, and a component on that page.'],
+      ]
+    },
+    quiz:[
+      {q:'What makes a Loop component special compared with copy-pasting text?',
+       opts:['It uses a nicer font','It stays in sync everywhere it\'s shared, always showing the latest version','It can only be opened by your manager','It automatically deletes after a week'],
+       a:1, why:'A component is one living piece of content. Edit it anywhere it appears and every copy updates at once.'},
+      {q:'Put the three building blocks in order, biggest container first.',
+       opts:['Component → Page → Workspace','Page → Component → Workspace','Workspace → Page → Component','Workspace → Component → Page'],
+       a:2, why:'A workspace holds pages, and each page holds components. Components are the smallest, most portable piece.'},
+    ]
+  },
+
+  /* ---------- 2. WORKSPACES & PAGES ---------- */
+  {
+    id:'workspaces', type:'lesson', nav:'Workspaces & pages', num:2, eyebrow:'Module 02 · Your containers',
+    title:'Workspaces & pages',
+    lede:'The places your work lives. Let\'s create your first ones.',
+    body:()=>`
+      <h2>Workspaces: a home per project</h2>
+      <p>A <strong>workspace</strong> is a shared space for everything tied to one project, team or topic. Inside it you can keep many pages, nest subpages, and even drop in links and files so the whole effort sits in one place.</p>
+      <ul>
+        <li><strong>My workspace</strong> is private to you — a single-member space, perfect for personal notes and drafts.</li>
+        <li><strong>Shared workspaces</strong> are ones you invite teammates into. Everyone added can see and edit the pages inside.</li>
+      </ul>
+      <div class="note"><span class="ic">${I.ws}</span><div>Rule of thumb: <b>one workspace per project or team</b>. Resist making a workspace for every tiny task — use pages and subpages inside a workspace for that.</div></div>
+
+      <h2>Pages: your canvas</h2>
+      <p>A <strong>page</strong> is where the actual work happens. It starts as a blank canvas with a title and grows as you add content. A page can hold any mix of text, components and subpages, and it expands to fit the size of your idea.</p>
+      <h3>The one shortcut to remember</h3>
+      <p>On any page, type <code class="k">/</code> (forward slash) to open the insert menu. That's how you add everything — a table, a task list, a heading, an image, a subpage. If you only memorise one thing in Loop, memorise the slash.</p>
+
+      <h2>Start from a template</h2>
+      <p>You rarely need a blank page. When you create a page or workspace, Loop offers <strong>templates</strong> — ready-made layouts for meeting notes, project planning, decisions, brainstorms and more. Pick one and you get useful structure instantly instead of staring at an empty canvas.</p>
+    `,
+    tryit:{
+      title:'Create your first workspace and page',
+      sub:'This is the big one — by the end you\'ll have a real space of your own.',
+      items:[
+        ['Create a workspace','Click <b>+ New workspace</b> in the left rail. Name it something like "Loop Practice".'],
+        ['Add a page','Inside it, add a new page and give it a title — try "My first page".'],
+        ['Use the slash menu','On the page, type <code class="k">/</code> and look at everything you can insert.'],
+        ['Add a cover or emoji','Give the page a little personality with an emoji or cover image up top.'],
+        ['Try a template','Create a second page and pick a template (e.g. <b>Meeting notes</b>) to see how it pre-fills.'],
+      ]
+    },
+    quiz:[
+      {q:'What\'s the quickest way to add content (a table, list, heading, etc.) to a Loop page?',
+       opts:['Right-click and choose Export','Type <code class="k">/</code> to open the insert menu','Press the spacebar three times','Email the page to yourself'],
+       a:1, why:'The slash command is the universal "insert" in Loop. Type / anywhere on a page to add components and more.'},
+      {q:'Which space is private to just you?',
+       opts:['A shared workspace','A Teams channel','My workspace','The Recycle bin'],
+       a:2, why:'"My workspace" has a single member — you. Shared workspaces are the ones you invite others into.'},
+      {q:'You\'re starting weekly team meeting notes. The fastest way to begin is:',
+       opts:['Build the layout from a blank page every week','Start from a meeting-notes template','Create a brand-new workspace for each meeting','Write the notes in an email instead'],
+       a:1, why:'Templates give you ready-made structure. A new workspace per meeting would clutter your rail fast.'},
+    ]
+  },
+
+  /* ---------- 3. COMPONENTS ---------- */
+  {
+    id:'components', type:'lesson', nav:'Components', num:3, eyebrow:'Module 03 · The heart of Loop',
+    title:'Working with components',
+    lede:'Components are the live, portable blocks that make Loop, Loop.',
+    body:()=>`
+      <p>A <strong>component</strong> is a self-contained block of live content you and others can edit together. You add one the same way you add anything — type <code class="k">/</code> and choose it from the menu. Here are the ones you'll actually use:</p>
+      <div class="gallery">
+        <div class="comp"><div class="cic">${I.table}</div><div><b>Table</b><span>Rows and columns for anything structured.</span></div></div>
+        <div class="comp"><div class="cic">${I.task}</div><div><b>Task list</b><span>Assign people and due dates — syncs to Planner &amp; To Do.</span></div></div>
+        <div class="comp"><div class="cic">${I.vote}</div><div><b>Voting table</b><span>List ideas, let everyone vote, best one wins.</span></div></div>
+        <div class="comp"><div class="cic">${I.progress}</div><div><b>Progress tracker</b><span>Show status across items at a glance.</span></div></div>
+        <div class="comp"><div class="cic">${I.kanban}</div><div><b>Kanban board</b><span>Cards you drag between columns by status.</span></div></div>
+        <div class="comp"><div class="cic">${I.check}</div><div><b>Checklist</b><span>Simple tick-box list for quick to-dos.</span></div></div>
+        <div class="comp"><div class="cic">${I.qa}</div><div><b>Q&amp;A</b><span>Collect questions, gather answers in one place.</span></div></div>
+        <div class="comp"><div class="cic">${I.para}</div><div><b>Lists &amp; paragraph</b><span>Bulleted, numbered or plain text blocks.</span></div></div>
+      </div>
+      <div class="note"><span class="ic">${I.comp}</span><div>You'll see a slightly different menu depending on where you are (a Teams chat offers fewer types than the full Loop app, for example). The Loop app always has the widest set.</div></div>
+
+      <h2>Editing together, live</h2>
+      <p>When teammates open the same component, you see their cursors and changes as they happen — like a shared whiteboard for text. There's no "save" button to fight over; everything saves continuously.</p>
+
+      <h3>@mention to pull someone in</h3>
+      <p>Type <code class="k">@</code> and a colleague's name to mention them. Use it to flag something for their attention, or — inside a <strong>task list</strong> — to assign them a task. Assigned tasks even flow into that person's Planner and To&nbsp;Do, so Loop fits your existing task tools instead of replacing them.</p>
+    `,
+    tryit:{
+      title:'Build a few real components',
+      sub:'On your practice page, type / and create these. Play with each one.',
+      items:[
+        ['Add a task list','Type <code class="k">/task</code>. Add two tasks, assign one to yourself and set a due date.'],
+        ['Add a voting table','Type <code class="k">/vot</code>. Add 3 ideas and cast a vote on your favourite.'],
+        ['Try an @mention','Type <code class="k">@</code> and a colleague\'s name somewhere on the page.'],
+        ['Add a kanban or progress tracker','Insert one and move a card or set a status, just to feel how it works.'],
+        ['Watch it save','Notice there\'s no Save button — make a change and it\'s already kept.'],
+      ]
+    },
+    quiz:[
+      {q:'Which component lets your team list options and vote on them?',
+       opts:['Progress tracker','Voting table','Code block','Table of contents'],
+       a:1, why:'The voting table is purpose-built for collecting ideas and tallying votes in real time.'},
+      {q:'You assign a task to a teammate in a Loop task list. What also happens?',
+       opts:['Nothing outside Loop','It appears in their Planner and To Do','It permanently locks the page','It emails your whole company'],
+       a:1, why:'Task lists integrate with Planner and To Do, so assignments show up in the tools people already use.'},
+      {q:'Why might the insert menu show fewer component types in a Teams chat than in the Loop app?',
+       opts:['Teams is broken','Component availability varies by where you are; the Loop app has the widest set','You need to buy each component','Components only work on Tuesdays'],
+       a:1, why:'Different host apps support different subsets. The full Loop app always offers the most options.'},
+    ]
+  },
+
+  /* ---------- 4. ACROSS APPS ---------- */
+  {
+    id:'across', type:'lesson', nav:'Working across apps', num:4, eyebrow:'Module 04 · The superpower',
+    title:'Taking components across apps',
+    lede:'This is the trick that makes colleagues go "oh, that\'s clever".',
+    body:()=>`
+      <p>Here's where Loop earns its name. A component can leave the Loop app and live inside the tools you already use — and it stays the <strong>same living component</strong> everywhere. Edit it in one place and every copy updates.</p>
+      <div class="sync">
+        <div class="sync-app"><div class="ttl">Teams chat</div><div class="sync-chip">${I.task} Sprint tasks</div></div>
+        <div class="sync-mid">${I.sync}<span>IN SYNC</span></div>
+        <div class="sync-app"><div class="ttl">Outlook email</div><div class="sync-chip">${I.task} Sprint tasks</div></div>
+      </div>
+      <p>Same task list, two apps, always identical. Tick a box in the email and it's ticked in the chat a second later.</p>
+
+      <h2>How to move a component</h2>
+      <ul>
+        <li>Hover the component and choose <strong>Copy link</strong> (top-right of the block).</li>
+        <li>Go to a Teams chat, an Outlook email, Word for the web, Whiteboard or OneNote.</li>
+        <li><strong>Paste</strong>. It appears as a fully editable component, not a dead screenshot.</li>
+      </ul>
+      <p>You can also create components <em>directly</em> in those apps — for example, insert a Loop component into a Teams message — and later find it back in your OneDrive, because each one is saved as a <code class="k">.loop</code> file.</p>
+
+      <div class="note"><span class="ic">${I.mail}</span><div><b>A quirk worth knowing:</b> the <b>web</b> versions of these apps render components best. Some desktop apps — classic Outlook desktop, Word desktop — may show a component as a link to click rather than a live block. Use the web version when you want the full inline experience.</div></div>
+
+      <h3>Where components are welcome</h3>
+      <div class="how-row">
+        <div class="how"><h4><span class="ic">${I.teams}</span> Teams</h4><p>Chats and channels — great for crowd-sourcing an agenda or tracking action items live.</p></div>
+        <div class="how"><h4><span class="ic">${I.mail}</span> Outlook, Word web, OneNote, Whiteboard</h4><p>Drop a component into an email, doc, notebook or board and keep editing it in sync.</p></div>
+      </div>
+    `,
+    tryit:{
+      title:'Send a component on a journey',
+      sub:'See the sync magic with your own eyes — this is the "aha" moment.',
+      items:[
+        ['Make a component in Loop','On your practice page, add a small task list or table.'],
+        ['Copy its link','Hover the component and click <b>Copy link</b> in the corner.'],
+        ['Paste into Teams or Outlook web','Open a chat with yourself, or a draft email in Outlook on the web, and paste.'],
+        ['Edit in the new spot','Change a value or tick a box <b>in Teams/Outlook</b>.'],
+        ['Flip back to Loop','Return to the original — your change is already there. That\'s the loop.'],
+      ]
+    },
+    quiz:[
+      {q:'You paste a Loop component into an Outlook (web) email and edit it there. The original in Loop will:',
+       opts:['Stay unchanged — they\'re separate copies','Update to match, because it\'s the same live component','Be deleted','Turn into a PDF'],
+       a:1, why:'It\'s one component in two places. An edit anywhere syncs everywhere it appears.'},
+      {q:'How do you take an existing component into another app?',
+       opts:['Screenshot it','Use Copy link on the component, then paste into the other app','Print and scan it','Retype it by hand'],
+       a:1, why:'Copy link then paste keeps it live and editable. A screenshot would just be a dead image.'},
+      {q:'A component shows up as a plain link instead of a live block. The most likely fix is:',
+       opts:['Reinstall Windows','Open the web version of that app for full inline rendering','Delete your account','Wait until next year'],
+       a:1, why:'Some desktop apps render components as links. The web versions give the full inline, editable experience.'},
+    ]
+  },
+
+  /* ---------- 5. SHARING ---------- */
+  {
+    id:'sharing', type:'lesson', nav:'Sharing & collaborating', num:5, eyebrow:'Module 05 · Working together',
+    title:'Sharing & collaborating',
+    lede:'Get the right people in — and get the scope right.',
+    body:()=>`
+      <p>There are two levels of sharing in Loop, and knowing which you're doing matters:</p>
+      <ul>
+        <li><strong>Share a whole workspace</strong> — adds people as members. Everyone added can see and edit <em>all</em> pages in it. Use this for your core project team.</li>
+        <li><strong>Share a single page or component</strong> — sends a link to just that item, as edit or read-only. Use this when you only want to show one thing.</li>
+      </ul>
+
+      <h2>Mind the scope</h2>
+      <p>When you share a link, you choose <strong>who it works for</strong>. This is the setting people most often get wrong, so slow down here:</p>
+      <div class="scopes">
+        <div class="scope good"><h4><span class="pip"></span> Specific people</h4><p>Only the people you name can open it. The safe default for anything sensitive.</p></div>
+        <div class="scope warn"><h4><span class="pip"></span> Anyone in your organisation</h4><p>A "company-wide" link anyone internal can open. Convenient, but think before using it for confidential content.</p></div>
+      </div>
+      <p><strong>External guests:</strong> if your organisation allows it, you can share with people outside your company using a "specific people" link. They sign in with a guest account and need that link each time — external people can't use company-wide links.</p>
+
+      <h2>Three features that save you</h2>
+      <div class="how-row">
+        <div class="how"><h4><span class="ic">${I.at}</span> Notifications</h4><p>@mentions and changes can notify you. Tune them so you only hear about what matters to you.</p></div>
+        <div class="how"><h4><span class="ic">${I.sync}</span> Version history</h4><p>Review previous versions of a page or component and restore one if something goes wrong.</p></div>
+      </div>
+      <div class="note"><span class="ic">${I.shield}</span><div><b>Deleting, carefully:</b> deleted <b>components and pages</b> can be restored from the <b>Recycle bin</b>. Deleting an entire <b>workspace</b> is permanent — there's no undo, so be sure.</div></div>
+    `,
+    tryit:{
+      title:'Practise sharing safely',
+      sub:'Use your practice workspace — nothing sensitive, so it\'s a safe sandbox.',
+      items:[
+        ['Share a page read-only','Open a page, choose Share, and create a <b>read-only</b> link to a colleague.'],
+        ['Notice the scope choice','Look at the "specific people" vs "anyone in your org" option before you send.'],
+        ['Open version history','Find version history on a page and see earlier versions.'],
+        ['Delete and restore','Delete a test component, then bring it back from the <b>Recycle bin</b>.'],
+      ]
+    },
+    quiz:[
+      {q:'You add a teammate as a member of a workspace. What can they do?',
+       opts:['See only the page you were on','See and edit all pages in that workspace','Nothing until you approve each page','Only view, never edit'],
+       a:1, why:'Workspace members get access to every page inside it. To limit someone to one item, share just that page instead.'},
+      {q:'You\'re sharing a page with confidential figures. The safest link scope is:',
+       opts:['Anyone in your organisation','Specific people you name','A public web link','Whoever finds it'],
+       a:1, why:'"Specific people" restricts access to exactly who you choose — the right default for sensitive content.'},
+      {q:'Which deletion can NOT be undone from the Recycle bin?',
+       opts:['Deleting a component','Deleting a page','Deleting an entire workspace','Deleting a single table row'],
+       a:2, why:'Components and pages can be restored from the Recycle bin. Deleting a whole workspace is permanent.'},
+    ]
+  },
+
+  /* ---------- 6. COPILOT & TEMPLATES ---------- */
+  {
+    id:'extras', type:'lesson', nav:'Templates & Copilot', num:6, eyebrow:'Module 06 · Faster starts',
+    title:'Templates & Copilot',
+    lede:'Two shortcuts that get you from blank page to useful, fast.',
+    body:()=>`
+      <h2>Templates: skip the blank page</h2>
+      <p>You met templates briefly already — they're worth a habit. Whenever you create a page or workspace, browse the templates first. There are ready-made layouts for project planning, meeting notes, decision-making, brainstorms, status tracking and more. Starting from one is almost always faster than building structure by hand.</p>
+      <div class="note"><span class="ic">${I.tmpl}</span><div>A good move when onboarding a team: agree on a couple of standard templates (say, one for meeting notes and one for project pages) so everyone's Loop pages look and work consistently.</div></div>
+
+      <h2>Copilot in Loop</h2>
+      <p>If your organisation has Copilot, you'll see it on Loop pages. It can help you draft content, brainstorm ideas, summarise what's there and refine drafts — handy for getting past a blank canvas or pulling a messy page into shape.</p>
+      <ul>
+        <li>Pick a suggested prompt or type your own, then refine the wording to improve the result.</li>
+        <li>Always treat the output as a first draft — read it, edit it, make it yours.</li>
+      </ul>
+      <div class="note"><span class="ic">${I.spark}</span><div><b>Note on access:</b> Copilot features need a Copilot for Microsoft 365 licence. If you don't see Copilot in Loop, your account probably isn't licensed for it — everything else in this course still works without it.</div></div>
+    `,
+    tryit:{
+      title:'Try a template (and Copilot, if you have it)',
+      sub:'Short and optional — do what your account allows.',
+      items:[
+        ['Browse templates','Create a new page and scroll through the template options before picking blank.'],
+        ['Fill one in','Use a template like <b>Project planning</b> and adapt it to a real or pretend project.'],
+        ['Look for Copilot','If you have it, open Copilot on a page and ask it to draft or summarise something.'],
+      ]
+    },
+    quiz:[
+      {q:'What\'s the main reason to start a page from a template?',
+       opts:['Templates make pages load faster','You get ready-made structure instead of a blank canvas','Templates are required to save','They hide the page from your team'],
+       a:1, why:'Templates hand you a useful layout immediately, so you spend time on content, not setup.'},
+      {q:'A colleague can\'t find Copilot in their Loop. The most likely reason is:',
+       opts:['They\'re using Loop wrong','Their account isn\'t licensed for Copilot','Copilot was removed from Loop entirely','They need to restart their PC five times'],
+       a:1, why:'Copilot in Loop requires a Copilot for Microsoft 365 licence. Without it, the feature simply won\'t appear.'},
+    ]
+  },
+
+  /* ---------- 7. PRIVACY & COMPLIANCE ---------- */
+  {
+    id:'privacy', type:'lesson', nav:'Privacy & compliance', num:7, eyebrow:'Module 07 · Staying on the safe side',
+    title:'Privacy, security & compliance',
+    lede:'A few minutes that keep you — and your data — out of trouble.',
+    body:()=>`
+      <p>Good news first: Loop isn't a separate, ungoverned island. Your Loop content lives inside your organisation's Microsoft 365 and follows the same rules as your other work files. Here's what that means in practice.</p>
+
+      <h2>Where your Loop data actually lives</h2>
+      <ul>
+        <li><strong>Components</strong> are saved as <code class="k">.loop</code> files in your <strong>OneDrive or SharePoint</strong> — same as any Office file.</li>
+        <li><strong>Shared workspaces</strong> are stored in <strong>SharePoint Embedded</strong> containers inside your tenant.</li>
+      </ul>
+      <p>So it's all within your company's Microsoft 365 boundary — not on some unrelated third-party server.</p>
+
+      <h2>It's governed like everything else</h2>
+      <p>Loop content is covered by <strong>Microsoft Purview</strong>, the same compliance toolset your admins use across Microsoft 365. That means data loss prevention, retention and eDiscovery can all apply to Loop, just like to email and documents. Your admins set these policies — you don't have to manage them, but it's good to know they're there.</p>
+
+      <h2>What's actually your job</h2>
+      <p>Most compliance is handled for you. Your part is small but important:</p>
+      <div class="how-row">
+        <div class="how"><h4><span class="ic">${I.tag}</span> Apply sensitivity labels</h4><p>You can label components, pages and workspaces (e.g. <b>Confidential</b>). Use them on sensitive content so protection follows the file.</p></div>
+        <div class="how"><h4><span class="ic">${I.shield}</span> Check who you're sharing with</h4><p>Before you send a link, glance at the scope: <b>specific people</b> vs <b>anyone in the org</b>. Match it to how sensitive the content is.</p></div>
+      </div>
+      <ul>
+        <li><strong>Don't paste regulated or confidential data</strong> into a broadly-shared component without thinking about who can reach it.</li>
+        <li><strong>Be deliberate with external guests</strong> — only invite outside people when it's genuinely needed and allowed.</li>
+        <li><strong>Storage counts.</strong> Loop content uses your Microsoft cloud storage quota, so tidy up workspaces you no longer need.</li>
+      </ul>
+      <div class="note"><span class="ic">${I.shield}</span><div><b>The one-line version:</b> treat a Loop page exactly like a Word doc or Excel file at your company. Label sensitive things, check your share scope, and you're doing your part.</div></div>
+    `,
+    tryit:{
+      title:'Build two safe habits',
+      sub:'Quick to do, and they\'ll serve you on every real page later.',
+      items:[
+        ['Find the sensitivity label','On a page or component, look for the sensitivity label option and see what labels your org offers.'],
+        ['Apply one to a test item','Label your practice page (you can change it back) so you know where the control is.'],
+        ['Re-check a share scope','Open the share dialog again and consciously read the "who can access" choice.'],
+        ['Tidy up','Delete a practice component you don\'t need, since Loop content uses your storage quota.'],
+      ]
+    },
+    quiz:[
+      {q:'Where are shared Loop workspaces stored?',
+       opts:['On a random external server','In SharePoint Embedded, inside your organisation\'s Microsoft 365','On the employee\'s personal phone','Nowhere — they\'re temporary'],
+       a:1, why:'Shared workspaces live in SharePoint Embedded containers within your tenant. Components save as .loop files in OneDrive/SharePoint.'},
+      {q:'Which compliance toolset governs Loop content alongside the rest of Microsoft 365?',
+       opts:['Microsoft Purview (DLP, retention, eDiscovery)','A separate Loop-only system with no oversight','Nothing applies to Loop','Only antivirus software'],
+       a:0, why:'Loop is covered by Microsoft Purview, so the same DLP, retention and eDiscovery policies apply as elsewhere.'},
+      {q:'You\'re about to share a page with confidential client data. Best practice is to:',
+       opts:['Use a company-wide link for convenience','Apply a sensitivity label and share with specific people only','Post the link in a public channel','Turn off all labels first'],
+       a:1, why:'Label sensitive content and restrict the link to named people — the end-user habits that keep data protected.'},
+    ]
+  },
+
+  /* ---------- 8. FINAL ---------- */
+  { id:'final', type:'final', nav:'Final & certificate', eyebrow:'You made it' },
+];
+
+/* ============================================================
+   STATE + APP
+   ============================================================ */
+const TOTAL_MODULES = COURSE.filter(m=>m.type==='lesson').length; // 7
+let state = { completed:{}, hands:{}, answers:{}, name:'', cur:0 };
+let cur = 0;
+
+async function init(){
+  const saved = await loadState();
+  if(saved) state = Object.assign(state, saved);
+  cur = state.cur || 0;
+  if(cur>=COURSE.length) cur=0;
+  buildNav();
+  render();
+  wireChrome();
+}
+
+function persist(){ state.cur = cur; saveState(state); }
+
+function moduleProgress(){
+  const done = COURSE.filter(m=>m.type==='lesson' && state.completed[m.id]).length;
+  return {done, pct: Math.round(done/TOTAL_MODULES*100)};
+}
+
+function buildNav(){
+  const nav = document.getElementById('nav');
+  const starSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>';
+  const checkSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const navCheck = '<span class="nav-check" style="color:#13b083"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  let html = '<div class="nav-label">Course</div>';
+  COURSE.forEach(function(m,i){
+    const done = state.completed[m.id] ? 'done' : '';
+    const label = m.type==='intro' ? 'Welcome' : (m.type==='final' ? 'Final &amp; certificate' : m.nav);
+    const num = m.type==='lesson' ? String(m.num) : (m.type==='final' ? checkSvg : starSvg);
+    html += '<button class="nav-item '+done+'" data-i="'+i+'" onclick="go('+i+')">'
+      + '<span class="nav-num">'+num+'</span>'
+      + '<span class="nav-txt">'+label+'</span>'
+      + navCheck
+      + '</button>';
+  });
+  nav.innerHTML = html;
+  updateProgressUI();
+}
+
+function updateNavActive(){
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active', +el.dataset.i===cur);
+    const m = COURSE[+el.dataset.i];
+    el.classList.toggle('done', !!state.completed[m.id]);
+  });
+}
+
+function updateProgressUI(){
+  const {done,pct} = moduleProgress();
+  const circ = 138.2;
+  const fill = document.getElementById('ringFill');
+  if(fill) fill.style.strokeDashoffset = circ - (circ*pct/100);
+  const rp=document.getElementById('ringPct'); if(rp) rp.textContent = pct+'%';
+  const dc=document.getElementById('doneCount'); if(dc) dc.textContent = done+' of '+TOTAL_MODULES;
+  const tp=document.getElementById('tbPct'); if(tp) tp.textContent = pct+'%';
+}
+
+/* -------- Render a module -------- */
+function render(){
+  const m = COURSE[cur];
+  const c = document.getElementById('canvas');
+  window.scrollTo({top:0,behavior:'instant'});
+  document.querySelector('.main').scrollTop=0;
+
+  if(m.type==='intro'){ c.innerHTML = m.render(); }
+  else if(m.type==='final'){ c.innerHTML = renderFinal(); wireFinal(); }
+  else { c.innerHTML = renderLesson(m); wireLesson(m); }
+
+  // pager
+  if(m.type!=='final' || true){ c.insertAdjacentHTML('beforeend', renderPager()); }
+  document.getElementById('tbTitle').textContent = (m.type==='intro'?'Welcome':(m.type==='final'?'Final & certificate':m.nav));
+  updateNavActive(); updateProgressUI();
+  persist();
+}
+
+function renderLesson(m){
+  return `
+    <div class="eyebrow"><span class="dash"></span> ${m.eyebrow}</div>
+    <h1 class="module-title">${m.title}</h1>
+    <p class="lede">${m.lede}</p>
+    <div class="module-body">${m.body()}</div>
+    ${renderTryit(m)}
+    ${renderQuiz(m)}
+    <div class="module-done-banner" id="doneBanner">
+      <span class="bdg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span>Module complete — nice work. Your progress is saved.</span>
+    </div>`;
+}
+
+function renderTryit(m){
+  if(!m.tryit) return '';
+  const items = m.tryit.items.map((it,idx)=>{
+    const id = m.id+'_h'+idx;
+    const checked = state.hands[id] ? 'checked':'';
+    return `<li><label>
+      <input type="checkbox" data-hand="${id}" ${checked}>
+      <span class="box">${I.tick}</span>
+      <span class="ctxt"><b>${it[0]}.</b> ${it[1]}</span>
+    </label></li>`;
+  }).join('');
+  return `<div class="tryit">
+    <div class="tryit-head"><span class="tag">Try it in real Loop</span><h3>${m.tryit.title}</h3></div>
+    <p class="sub">${m.tryit.sub}</p>
+    <ul class="checklist">${items}</ul>
+    <div class="tryit-foot">Need it? <a class="openloop-sm" href="https://loop.cloud.microsoft" target="_blank" rel="noopener">${I.comp} Open Microsoft Loop</a></div>
+  </div>`;
+}
+
+function renderQuiz(m){
+  if(!m.quiz) return '';
+  const qs = m.quiz.map((q,qi)=>{
+    const saved = state.answers[m.id] && state.answers[m.id][qi];
+    const opts = q.opts.map((o,oi)=>{
+      let cls='opt';
+      if(saved!=null){
+        cls+=' locked';
+        if(oi===q.a) cls+=' correct';
+        else if(oi===saved) cls+=' wrong';
+        else if(oi===saved) cls+=' sel';
+      }
+      return `<div class="${cls}" data-q="${qi}" data-o="${oi}"><span class="dot"><i></i></span><span>${o}</span></div>`;
+    }).join('');
+    const fb = saved!=null
+      ? `<div class="feedback show ${saved===q.a?'ok':'no'}"><b>${saved===q.a?'Correct.':'Not quite.'}</b> ${q.why}</div>`
+      : `<div class="feedback"></div>`;
+    return `<div class="q" data-qi="${qi}"><p class="qtext">${qi+1}. ${q.q}</p>${opts}${fb}</div>`;
+  }).join('');
+  const allDone = state.completed[m.id];
+  return `<div class="quiz">
+    <div class="quiz-h"><span class="qmark">?</span><h2>Quick check</h2></div>
+    <p class="quiz-sub">Answer to lock in the module. Get one wrong? You'll see why and can try again.</p>
+    ${qs}
+    <button class="checkbtn" id="checkBtn" ${allDone?'disabled':''}>${allDone?'Module passed ✓':'Check answers'}</button>
+  </div>`;
+}
+
+function renderPager(){
+  const prev = cur>0 ? COURSE[cur-1] : null;
+  const nextM = cur<COURSE.length-1 ? COURSE[cur+1] : null;
+  const nm = m => m.type==='intro'?'Welcome':(m.type==='final'?'Final & certificate':(m.num?('Module '+m.num+' · '+m.nav):m.nav));
+  return `<div class="pager">
+    <button ${prev?'':'disabled'} onclick="go(${cur-1})">
+      <span class="pg-dir">← Previous</span><span class="pg-name">${prev?nm(prev):'—'}</span></button>
+    <button class="next" ${nextM?'':'disabled'} onclick="go(${cur+1})">
+      <span class="pg-dir">Next →</span><span class="pg-name">${nextM?nm(nextM):'—'}</span></button>
+  </div>`;
+}
+
+/* -------- Wire interactions -------- */
+function wireLesson(m){
+  // hands-on checkboxes
+  document.querySelectorAll('[data-hand]').forEach(cb=>{
+    cb.addEventListener('change',()=>{ state.hands[cb.dataset.hand]=cb.checked; persist(); });
+  });
+  if(!m.quiz) return;
+
+  let selected = {}; // qi -> oi (pre-check)
+  // restore selection state if already answered handled in render
+  document.querySelectorAll('.q .opt').forEach(opt=>{
+    if(opt.classList.contains('locked')) return;
+    opt.addEventListener('click',()=>{
+      const qi=opt.dataset.q;
+      document.querySelectorAll(`.opt[data-q="${qi}"]`).forEach(o=>o.classList.remove('sel'));
+      opt.classList.add('sel'); selected[qi]=+opt.dataset.o;
+    });
+  });
+
+  const btn = document.getElementById('checkBtn');
+  if(!btn) return;
+  if(state.completed[m.id]){ revealBanner(false); }
+  btn.addEventListener('click',()=>{
+    if(btn.textContent.indexOf('Try again')>-1){
+      // reset this module's quiz
+      delete state.answers[m.id];
+      state.completed[m.id]=false; selected={};
+      buildNav(); render(); return;
+    }
+    // ensure all answered
+    const total=m.quiz.length;
+    if(Object.keys(selected).length<total){
+      btn.textContent='Answer every question first';
+      setTimeout(()=>{ if(!state.completed[m.id]) btn.textContent='Check answers'; },1500);
+      return;
+    }
+    // grade
+    let correct=0; state.answers[m.id]={};
+    m.quiz.forEach((q,qi)=>{
+      const pick=selected[qi]; state.answers[m.id][qi]=pick;
+      if(pick===q.a) correct++;
+      const qEl=document.querySelector(`.q[data-qi="${qi}"]`);
+      qEl.querySelectorAll('.opt').forEach(o=>{
+        o.classList.add('locked');
+        const oi=+o.dataset.o;
+        o.classList.remove('sel');
+        if(oi===q.a) o.classList.add('correct');
+        else if(oi===pick) o.classList.add('wrong');
+      });
+      const fb=qEl.querySelector('.feedback');
+      fb.className='feedback show '+(pick===q.a?'ok':'no');
+      fb.innerHTML=`<b>${pick===q.a?'Correct.':'Not quite.'}</b> ${q.why}`;
+    });
+    const passed = correct===total;
+    state.completed[m.id]=passed;
+    persist(); buildNav(); updateProgressUI();
+    if(passed){
+      btn.disabled=true; btn.textContent='Module passed ✓';
+      revealBanner(true);
+    }else{
+      btn.disabled=false; btn.classList.add('again');
+      btn.textContent=`Try again (${correct}/${total} right)`;
+    }
+    document.querySelector('.quiz').scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+}
+
+function revealBanner(animate){
+  const b=document.getElementById('doneBanner');
+  if(b) b.classList.add('show');
+}
+
+/* -------- Final + certificate -------- */
+function renderFinal(){
+  const {done,pct}=moduleProgress();
+  const allDone = done===TOTAL_MODULES;
+  const circ=2*Math.PI*52;
+  const off=circ-(circ*pct/100);
+
+  const status = allDone
+    ? `<p class="lede" style="margin-bottom:0">Every module complete. Put your name on it and make it official.</p>`
+    : `<p class="lede" style="margin-bottom:0">You've finished <b>${done} of ${TOTAL_MODULES}</b> modules. Wrap up the rest to unlock your certificate — your progress is saved, so you can come back anytime.</p>`;
+
+  let body = `
+    <div class="eyebrow"><span class="dash"></span> ${COURSE[cur].eyebrow}</div>
+    <h1 class="module-title">${allDone?'You\'re Loop-fluent. 🎉':'Almost there'}</h1>
+    ${status}
+    <div class="card score-block" style="text-align:center;margin-top:28px">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" stroke="#eee" stroke-width="9" fill="none"/>
+          <circle cx="60" cy="60" r="52" stroke="url(#bg)" stroke-width="9" fill="none" stroke-linecap="round"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="num">${pct}%<small>${done}/${TOTAL_MODULES} modules</small></div>
+      </div>
+      <p style="margin:6px 0 0;color:var(--muted);font-size:15px">${allDone?'Course complete':'Keep going — you\'ve got this'}</p>
+    </div>`;
+
+  if(allDone){
+    const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+    if(state.name){
+      body += renderCertificate(state.name, today);
+    } else {
+      body += `
+      <h2 class="intro-h2" style="text-align:center">Add your name to your certificate</h2>
+      <div class="name-row">
+        <input id="nameInput" type="text" placeholder="Your full name" maxlength="40" value="">
+        <button onclick="setName()">Generate certificate</button>
+      </div>`;
+    }
+  } else {
+    // show which remain
+    const remaining = COURSE.filter(m=>m.type==='lesson' && !state.completed[m.id]);
+    body += `<h2 class="intro-h2">Still to finish</h2><div class="gallery">`+
+      remaining.map(m=>`<div class="comp" style="cursor:pointer" onclick="go(${COURSE.indexOf(m)})">
+        <div class="cic">${m.num}</div><div><b>${m.nav}</b><span>Open module ${m.num} →</span></div></div>`).join('')
+      +`</div>`;
+  }
+  return body;
+}
+
+function renderCertificate(name, date){
+  return `
+  <div class="certificate" id="cert">
+    <div class="cert-grid"></div>
+    <div class="cert-in">
+      <svg class="cert-seal" viewBox="0 0 64 64" fill="none">
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="64" y2="64"><stop offset="0" stop-color="#8a72ff"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs>
+        <circle cx="32" cy="32" r="28" stroke="url(#sg)" stroke-width="2.5" stroke-dasharray="3 4"/>
+        <path d="M22 32c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10c-3.6 0-5.6-2-7.6-4.8C22.4 33.6 21 32 18.5 32" stroke="url(#sg)" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+        <path d="M27 32l3.5 3.5L40 27" stroke="url(#sg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <div class="cert-k">Certificate of Completion</div>
+      <p class="cert-sub">This certifies that</p>
+      <div class="cert-name">${escapeHtml(name)}</div>
+      <p class="cert-sub" style="margin-top:14px">has completed the hands-on course</p>
+      <div class="cert-course">Getting Started with Microsoft Loop</div>
+      <div class="cert-foot">
+        <div class="blk"><div class="lbl">Completed</div><div class="val">${date}</div></div>
+        <div class="blk r"><div class="lbl">Modules</div><div class="val">${TOTAL_MODULES} / ${TOTAL_MODULES} passed</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cert-actions">
+    <button class="btn-primary" style="background:var(--ink);color:#fff" onclick="window.print()">${I.page} Print / save as PDF</button>
+    <button class="btn-ghost" style="background:var(--grad-soft);color:var(--violet);border-color:var(--hairline)" onclick="changeName()">Change name</button>
+  </div>`;
+}
+
+function wireFinal(){
+  const ni=document.getElementById('nameInput');
+  if(ni){ ni.focus(); ni.addEventListener('keydown',e=>{ if(e.key==='Enter') setName(); }); }
+}
+function setName(){
+  const ni=document.getElementById('nameInput');
+  if(!ni) return;
+  const v=ni.value.trim();
+  if(!v){ ni.focus(); ni.style.borderColor='var(--magenta)'; return; }
+  state.name=v; persist(); render();
+}
+function changeName(){ state.name=''; persist(); render(); }
+
+/* ============================================================
+   NAV / CHROME
+   ============================================================ */
+function go(i){
+  if(i<0||i>=COURSE.length) return;
+  cur=i; render();
+  closeRail();
+}
+function next(){ go(cur+1); }
+
+function wireChrome(){
+  const burger=document.getElementById('burger');
+  const rail=document.getElementById('rail');
+  const scrim=document.getElementById('scrim');
+  if(burger) burger.addEventListener('click',()=>{ rail.classList.add('open'); scrim.classList.add('show'); });
+  if(scrim) scrim.addEventListener('click',closeRail);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape') closeRail();
+    if(e.target.tagName==='INPUT') return;
+    if(e.key==='ArrowRight') next();
+    if(e.key==='ArrowLeft') go(cur-1);
+  });
+}
+function closeRail(){
+  const rail=document.getElementById('rail'); const scrim=document.getElementById('scrim');
+  if(rail) rail.classList.remove('open'); if(scrim) scrim.classList.remove('show');
+}
+window.go=go; window.next=next; window.setName=setName; window.changeName=changeName;
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function heroLoopSVG(){
+  return `<svg class="hero-loop" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="hl" x1="40" y1="100" x2="360" y2="300" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#a78bfa"/><stop offset=".5" stop-color="#c084fc"/><stop offset="1" stop-color="#f472b6"/>
+      </linearGradient>
+      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path id="loopPath" d="M120 200 C120 130 200 130 200 200 C200 270 280 270 280 200 C280 130 200 130 200 200 C200 270 120 270 120 200 Z"
+      stroke="url(#hl)" stroke-width="10" stroke-linecap="round" opacity=".5"/>
+    <path class="pulse-dash" d="M120 200 C120 130 200 130 200 200 C200 270 280 270 280 200 C280 130 200 130 200 200 C200 270 120 270 120 200 Z"
+      stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"
+      stroke-dasharray="34 380" filter="url(#glow)">
+      <animate attributeName="stroke-dashoffset" from="414" to="0" dur="3.4s" repeatCount="indefinite"/>
+    </path>
+    <circle r="7" fill="#fff" filter="url(#glow)">
+      <animateMotion dur="3.4s" repeatCount="indefinite"
+        path="M120 200 C120 130 200 130 200 200 C200 270 280 270 280 200 C280 130 200 130 200 200 C200 270 120 270 120 200 Z"/>
+    </circle>
+  </svg>`;
+}
+
+/* go */
+init();
+</script>
+</body>
+</html>
